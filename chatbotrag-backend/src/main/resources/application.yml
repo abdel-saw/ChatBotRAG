@@ -1,0 +1,51 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: chatbotrag-backend
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:db}:5432/chatbotrag
+    username: postgres
+    password: password123
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      
+      # Configuration du Chat (LLM)
+      chat:
+        options:
+          model: llama3.2:3b          # Bon compromis vitesse / qualité (recommandé)
+          # model: llama3.1:8b        # Plus puissant mais plus lent et gourmand
+
+      # Configuration des Embeddings
+      embedding:
+        options:
+          model: mxbai-embed-large
+
+    # Vector Store PGVector
+    vectorstore:
+      pgvector:
+        initialize-schema: true
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        dimensions: 1024
+
+logging:
+  level:
+    com.chatbotrag: DEBUG
+    org.springframework.ai: INFO
+    
+jwt:
+  secret: SuperSecretTresLongEtAleatoireChangeLeEnProd2026!!!
+  expiration-ms: 86400000
