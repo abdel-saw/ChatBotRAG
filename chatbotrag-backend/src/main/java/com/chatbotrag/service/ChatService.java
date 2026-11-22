@@ -82,10 +82,6 @@ public class ChatService {
 				.collect(Collectors.joining("\n\n---\n\n"));
 		
 		
-		// DEBUG
-		System.out.println("=== CONTEXT LENGTH: " + context.length() + " ===");
-		System.out.println(context);
-		
 
 		// GARDE-FOU : Si pas de contexte pertinent → réponse directe SANS appeler le LLM
 		if (context.trim().isEmpty() || context.length() < 30) {

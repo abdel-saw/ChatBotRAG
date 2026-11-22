@@ -120,6 +120,11 @@ public class DocumentService {
             throw new RuntimeException("Unauthorized");
         }
 
+        // Remove indexed content first. A vector-store failure must not leave
+        // a deleted file/document whose old text can still be retrieved.
+        // Include ownership as well as the document ID, matching upload metadata.
+        vectorStore.delete("documentId == " + documentId + " && userId == " + user.getId());
+
         // Suppression physique du fichier
         try {
             Files.deleteIfExists(Paths.get(document.getFilePath()));
@@ -127,7 +132,7 @@ public class DocumentService {
             // Log error
         }
 
-        // Suppression des chunks dans vector store (Spring AI n'a pas de deleteByMetadata, on le fait manuellement)
+        // Clean up legacy JPA chunk records separately from Spring AI's vector store.
         documentChunkRepository.deleteByDocument(document);
 
         documentRepository.delete(document);
