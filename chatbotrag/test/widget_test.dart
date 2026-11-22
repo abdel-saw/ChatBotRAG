@@ -61,4 +61,19 @@ void main() {
     expect(router.routeInformationProvider.value.uri.path, '/login');
     expect(find.text('Se connecter'), findsOneWidget);
   });
+  testWidgets('dashboard scrolls on a small phone without overflow', (tester) async {
+    final container = await mount(tester);
+    tester.view.physicalSize = const Size(320, 568);
+    await container.read(authServiceProvider).login('fixture-token', 'fixture@example.test');
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.scrollUntilVisible(
+      find.text('Inférence locale avec Ollama'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Inférence locale avec Ollama').hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
 }
