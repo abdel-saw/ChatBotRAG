@@ -3,7 +3,7 @@
 From `chatbotrag-backend`, use Java 21 and the included Maven wrapper:
 
 ```bash
-bash mvnw -B -Dtest=DocumentServiceTest,ChatServiceTest,PgVectorDocumentDeletionTest test
+bash mvnw -B -Dtest=DocumentServiceTest,ChatServiceTest,PgVectorDocumentDeletionTest,JwtUtilTest test
 ```
 
 On Windows PowerShell, use `./mvnw.cmd` instead of `bash mvnw`.
@@ -29,7 +29,7 @@ Optional database settings:
 - `PGVECTOR_TEST_USER` and `PGVECTOR_TEST_PASSWORD` (default: `postgres`).
 
 GitHub Actions provisions an isolated pgvector/PostgreSQL 16 service and runs
-all nine checks with Java 21. No Ollama instance or model download is required.
+all thirteen Java checks with Java 21. No Ollama instance or model download is required.
 The existing application-context scaffold is separate from this targeted suite;
 it still needs its own application/database configuration.
 
@@ -37,3 +37,16 @@ Document files and database records do not share an atomic transaction. These
 checks establish that vector deletion happens first and its failure does not
 delete the file or metadata; they do not establish recovery from every later
 filesystem or database failure.
+
+## Local setup and startup
+
+From `chatbotrag-backend`, run `python -m unittest discover -s scripts -p "test_*.py" -v`
+for four local credential-generation checks. They verify that existing files are
+preserved and credentials are not printed.
+
+The `docker-startup` CI job generates temporary configuration, validates Compose,
+builds the backend image, and starts PostgreSQL, Ollama and the backend. It checks
+registration and authenticated document listing, then removes its isolated test
+volumes. It does not pull models or call inference; Flutter device behavior and
+full document conversations remain separate checks.
+

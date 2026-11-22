@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Local runtime configuration and uploaded documents
+.env
+.env.*
+!.env.example
+uploads/
+

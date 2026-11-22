@@ -1,41 +1,58 @@
 services:
   db:
     image: pgvector/pgvector:pg16
-    container_name: chatbotrag-db
     environment:
       POSTGRES_DB: chatbotrag
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password123
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Generate .env with python scripts/setup_local.py}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d chatbotrag"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
 
   ollama:
     image: ollama/ollama:latest
-    container_name: chatbotrag-ollama
     ports:
-      - "11434:11434"
+      - "127.0.0.1:11434:11434"
     volumes:
       - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
     restart: unless-stopped
 
   backend:
     build: .
-    container_name: chatbotrag-backend
     ports:
-      - "8080:8080"
+      - "${BACKEND_BIND_ADDRESS:-127.0.0.1}:8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/chatbotrag
       SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: password123
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?Generate .env with python scripts/setup_local.py}
+      JWT_SECRET: ${JWT_SECRET:?Generate .env with python scripts/setup_local.py}
       OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_CHAT_MODEL: ${OLLAMA_CHAT_MODEL:-llama3.2:3b}
+      OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-mxbai-embed-large}
+    volumes:
+      - uploads_data:/app/uploads
     depends_on:
-      - db
-      - ollama
+      db:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
     restart: on-failure
 
 volumes:
   postgres_data:
   ollama_data:
+  uploads_data:
+
