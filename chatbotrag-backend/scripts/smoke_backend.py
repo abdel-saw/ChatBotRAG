@@ -6,20 +6,24 @@ from urllib.request import Request, urlopen
 import uuid
 
 
-def main():
-    base = "http://127.0.0.1:8080"
-    for attempt in range(60):
+def wait_for_backend(base, opener=urlopen, pause=time.sleep, attempts=60):
+    for attempt in range(attempts):
         try:
-            with urlopen(base + "/api/documents", timeout=3):
-                break
+            with opener(base + "/api/documents", timeout=3):
+                raise AssertionError("Unauthenticated document access must be denied")
         except HTTPError as exc:
             if exc.code in (401, 403):
-                break
-        except (URLError, TimeoutError):
+                return
+        except (URLError, TimeoutError, ConnectionError):
             pass
-        if attempt == 59:
+        if attempt == attempts - 1:
             raise SystemExit("Backend did not become ready")
-        time.sleep(2)
+        pause(2)
+
+
+def main():
+    base = "http://127.0.0.1:8080"
+    wait_for_backend(base)
     credentials = {"email": f"smoke-{uuid.uuid4().hex}@example.test",
                    "password": uuid.uuid4().hex, "name": "CI smoke check"}
     request = Request(base + "/api/auth/register", data=json.dumps(credentials).encode(),

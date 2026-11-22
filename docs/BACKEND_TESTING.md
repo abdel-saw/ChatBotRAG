@@ -41,8 +41,9 @@ filesystem or database failure.
 ## Local setup and startup
 
 From `chatbotrag-backend`, run `python -m unittest discover -s scripts -p "test_*.py" -v`
-for four local credential-generation checks. They verify that existing files are
-preserved and credentials are not printed.
+for seven local setup/startup checks. They verify that existing credentials are
+preserved, secret values are not printed, transient connection resets are retried
+and unauthenticated document access is rejected.
 
 The `docker-startup` CI job generates temporary configuration, validates Compose,
 builds the backend image, and starts PostgreSQL, Ollama and the backend. It checks
