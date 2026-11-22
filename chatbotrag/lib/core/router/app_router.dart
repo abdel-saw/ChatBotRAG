@@ -10,9 +10,9 @@ import 'package:chatbotrag/features/document/presentation/screens/documents_scre
 import 'package:chatbotrag/shared/services/auth_service.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
-  final authService = ref.watch(authServiceProvider);
+  final authService = ref.watch(authServiceProvider.notifier);
 
-  return GoRouter(
+  final router = GoRouter(
     initialLocation: '/login',
     refreshListenable: authService,
     redirect: (context, state) {
@@ -70,4 +70,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       // Autres routes (documents, chat) seront ajoutées plus tard
     ],
   );
+  ref.onDispose(router.dispose);
+  return router;
 });

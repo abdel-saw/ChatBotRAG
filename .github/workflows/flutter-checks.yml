@@ -1,0 +1,57 @@
+name: Flutter client checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "chatbotrag/**"
+      - ".github/workflows/flutter-checks.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "chatbotrag/**"
+      - ".github/workflows/flutter-checks.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  client:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: chatbotrag
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - name: Set up Java for Android
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version: "3.41.0"
+          cache: true
+      - name: Install client dependencies
+        run: flutter pub get
+      - name: Analyze errors and warnings
+        run: flutter analyze --no-fatal-infos
+      - name: Run client tests
+        run: flutter test
+      - name: Verify a custom compiled API address
+        run: flutter test --dart-define=API_BASE_URL=https://api.example.test test/api_service_test.dart
+      - name: Build web client
+        run: flutter build web --release --dart-define=API_BASE_URL=https://api.example.test
+      - name: Build Android debug APK
+        run: flutter build apk --debug --dart-define=API_BASE_URL=http://10.0.2.2:8080
+
