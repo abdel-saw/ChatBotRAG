@@ -43,13 +43,15 @@ class HomeScreen extends ConsumerWidget {
             const SizedBox(height: 40),
 
             // Cartes d'actions
-            GridView.count(
+            GridView(
               shrinkWrap: true,
-              crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
               physics: const NeverScrollableScrollPhysics(),
-              mainAxisExtent: 220,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                mainAxisExtent: 220,
+              ),
               children: [
                 _buildActionCard(
                   context,
