@@ -8,8 +8,10 @@ class ApiService {
 
   ApiService(this.authService) {
     dio = Dio(BaseOptions(
-      baseUrl: 'http://192.168.11.110:8080',     // Pour émulateur Android
-      // baseUrl: 'http://localhost:8080',       // Pour Web / iOS Simulator
+      baseUrl: const String.fromEnvironment(
+        'API_BASE_URL',
+        defaultValue: 'http://10.0.2.2:8080', // Android emulator host
+      ),
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 360),
       headers: {'Content-Type': 'application/json'},

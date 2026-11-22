@@ -51,5 +51,31 @@ jobs:
           cache: maven
           cache-dependency-path: chatbotrag-backend/pom.xml
       - name: Run document and privacy regression checks
-        run: bash mvnw -B -Dtest=DocumentServiceTest,ChatServiceTest,PgVectorDocumentDeletionTest test
+        run: bash mvnw -B -Dtest=DocumentServiceTest,ChatServiceTest,PgVectorDocumentDeletionTest,JwtUtilTest test
+
+
+  docker-startup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: chatbotrag-backend
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - name: Test local credential generation
+        run: python3 -m unittest discover -s scripts -p 'test_*.py' -v
+      - name: Generate local configuration and validate Compose
+        run: |
+          python3 scripts/setup_local.py
+          docker compose config --quiet
+      - name: Build and start the stack
+        run: docker compose up -d --build --wait --wait-timeout 180 backend
+      - name: Check registration and authenticated document access
+        run: python3 scripts/smoke_backend.py
+      - name: Stop the test stack
+        if: always()
+        run: docker compose down --volumes
 
