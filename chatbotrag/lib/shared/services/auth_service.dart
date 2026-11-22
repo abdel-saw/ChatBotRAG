@@ -10,10 +10,6 @@ class AuthService extends ChangeNotifier {
   String? get userEmail => _userEmail;
   bool get isLoggedIn => _token != null;
 
-  final Ref _ref;
-
-  AuthService(this._ref);
-
   Future<void> login(String token, String email) async {
     _token = token;
     _userEmail = email;
@@ -46,7 +42,7 @@ class AuthService extends ChangeNotifier {
 }
 
 final authServiceProvider = ChangeNotifierProvider<AuthService>((ref) {
-  final authService = AuthService(ref);
+  final authService = AuthService();
   authService.loadFromStorage();
   return authService;
 });

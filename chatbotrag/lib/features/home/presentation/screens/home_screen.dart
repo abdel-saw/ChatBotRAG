@@ -24,7 +24,7 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,12 +43,15 @@ class HomeScreen extends ConsumerWidget {
             const SizedBox(height: 40),
 
             // Cartes d'actions
-            GridView.count(
+            GridView(
               shrinkWrap: true,
-              crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 1.1,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: MediaQuery.sizeOf(context).width < 360 ? 1 : 2,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                mainAxisExtent: 220,
+              ),
               children: [
                 _buildActionCard(
                   context,
@@ -56,7 +59,7 @@ class HomeScreen extends ConsumerWidget {
                   title: "Upload document",
                   subtitle: "Ajouter un document",
                   color: Colors.indigo,
-                  onTap: () => context.push('/upload'), // à créer plus tard
+                  onTap: () => context.push('/upload'),
                 ),
                 _buildActionCard(
                   context,
@@ -85,11 +88,11 @@ class HomeScreen extends ConsumerWidget {
               ],
             ),
 
-            const Spacer(),
+            const SizedBox(height: 24),
 
             Center(
               child: Text(
-                "Backend connecté • Ollama (local)",
+                "Inférence locale avec Ollama",
                 style: TextStyle(color: Colors.green.shade600, fontSize: 12),
               ),
             ),
